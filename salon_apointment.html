@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalonPro - Advanced Queue Display</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #8e44ad;
+            --secondary-color: #9b59b6;
+            --accent-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .queue-display {
+            background: linear-gradient(135deg, var(--dark-color), #2c3e50);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+        }
+        
+        .queue-header {
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .staff-queue-container {
+            position: relative;
+            min-height: 500px;
+        }
+        
+        .staff-queue {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            width: 100%;
+        }
+        
+        .staff-slide {
+            min-width: 100%;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+        
+        .staff-info-container {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .staff-avatar-container {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-right: 20px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .staff-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+        
+        .staff-details {
+            width: 75%;
+            padding-left: 20px;
+        }
+        
+        .staff-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .staff-specialty {
+            color: #95a5a6;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .service-status {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .service-column {
+            flex: 1;
+        }
+        
+        .waiting-queue {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .current-customer {
+            background-color: rgba(46, 204, 113, 0.2);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .next-customer {
+            background-color: rgba(52, 152, 219, 0.2);
+            border-left: 4px solid var(--info-color);
+        }
+        
+        .waiting-customer {
+            background-color: rgba(243, 156, 18, 0.2);
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .customer-card {
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            padding: 15px;
+        }
+        
+        .customer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .customer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+        
+        .countdown {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        .service-badge {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .progress-thin {
+            height: 6px;
+        }
+        
+        .estimated-time {
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-serving {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .badge-next {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .badge-waiting {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .staff-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .staff-nav:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        .staff-nav-prev {
+            left: 10px;
+        }
+        
+        .staff-nav-next {
+            right: 10px;
+        }
+        
+        .staff-nav-disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .staff-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .staff-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.3);
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .staff-indicator.active {
+            background-color: white;
+        }
+        
+        .queue-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (max-width: 992px) {
+            .staff-info-container {
+                flex-direction: column;
+            }
+            
+            .staff-avatar-container {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,0.2);
+                padding-right: 0;
+                padding-bottom: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .staff-details {
+                width: 100%;
+                padding-left: 0;
+            }
+            
+            .service-status {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .queue-display {
+                padding: 1.5rem 0;
+            }
+            
+            .customer-avatar {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .countdown {
+                font-size: 1.2rem;
+            }
+            
+            .staff-avatar {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .staff-name {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cut me-2"></i>SalonPro
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Queue</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Book Appointment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Staff</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle language-selector" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-globe me-1"></i> English
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">English</a></li>
+                            <li><a class="dropdown-item" href="#">Español</a></li>
+                            <li><a class="dropdown-item" href="#">Français</a></li>
+                            <li><a class="dropdown-item" href="#">العربية</a></li>
+                            <li><a class="dropdown-item" href="#">中文</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-outline-primary" href="#">Client Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Queue Display Section -->
+    <section class="queue-display">
+        <div class="container">
+            <div class="queue-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="mb-0"><i class="fas fa-users me-2"></i>Staff Queue Display</h2>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="d-inline-block me-3">
+                            <span class="text-white-50 me-2"><i class="fas fa-clock"></i></span>
+                            <span id="current-time" class="fw-bold">10:15 AM</span>
+                        </div>
+                        <div class="d-inline-block">
+                            <span class="text-white-50 me-2"><i class="fas fa-calendar-day"></i></span>
+                            <span id="current-date" class="fw-bold">June 15, 2023</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="staff-queue-container">
+                <!-- Navigation arrows -->
+                <div class="staff-nav staff-nav-prev" id="staff-prev">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="staff-nav staff-nav-next" id="staff-next">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                
+                <!-- Staff Queue Slides -->
+                <div class="staff-queue" id="staff-queue">
+                    <!-- Staff 1 -->
+                    <div class="staff-slide">
+                        <div class="staff-info-container">
+                            <div class="staff-avatar-container">
+                                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Staff" class="staff-avatar">
+                                <div class="text-center">
+                                    <h4 class="staff-name mb-1">Maria Rodriguez</h4>
+                                    <p class="staff-specialty mb-0">Hair Specialist</p>
+                                </div>
+                            </div>
+                            <div class="staff-details">
+                                <!-- Current and Next Service -->
+                                <div class="service-status">
+                                    <div class="service-column">
+                                        <h5 class="queue-title"><i class="fas fa-user-check me-2"></i>Currently Serving</h5>
+                                        <div class="customer-card current-customer">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="status-badge badge-serving">In Service</span>
+                                                </div>
+                                                <div class="countdown" id="current-countdown-1">12:45</div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Customer" class="customer-avatar me-3">
+                                                <div>
+                                                    <h5 class="mb-1">Sarah Johnson</h5>
+                                                    <p class="mb-1 small">Haircut & Coloring</p>
+                                                    <div class="estimated-time">
+                                                        <i class="fas fa-user-clock me-1"></i> Estimated finish: <span id="current-finish-1">10:30 AM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="d-flex justify-content-between small mb-1">
+                                                    <span>Service Progress</span>
+                                                    <span>65%</span>
+                                                </div>
+                                                <div class="progress progress-thin">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-column">
+                                        <h5 class="queue-title"><i class="fas fa-user-clock me-2"></i>Next in Line</h5>
+                                        <div class="customer-card next-customer">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="status-badge badge-next">Next Up</span>
+                                                </div>
+                                                <div class="countdown" id="next-countdown-1">-</div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Customer" class="customer-avatar me-3">
+                                                <div>
+                                                    <h5 class="mb-1">Michael Brown</h5>
+                                                    <p class="mb-1 small">Beard Trim & Shave</p>
+                                                    <div class="estimated-time">
+                                                        <i class="fas fa-clock me-1"></i> Estimated start: <span id="next-start-1">10:35 AM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="d-flex justify-content-between small mb-1">
+                                                    <span>Estimated Wait Time</span>
+                                                    <span>20 min</span>
+                                                </div>
+                                                <div class="progress progress-thin">
+                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 25%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Waiting Queue -->
+                                <div class="waiting-queue">
+                                    <h5 class="queue-title"><i class="fas fa-users me-2"></i>Waiting Queue</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="customer-card waiting-customer">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div>
+                                                        <span class="status-badge badge-waiting">Waiting #1</span>
+                                                    </div>
+                                                    <div class="countdown" id="wait-time-1">45 min</div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Customer" class="customer-avatar me-3">
+                                                    <div>
+                                                        <h5 class="mb-1">Emily Davis</h5>
+                                                        <p class="mb-1 small">Manicure & Pedicure</p>
+                                                        <div class="estimated-time">
+                                                            <i class="fas fa-user-clock me-1"></i> Estimated slot: <span id="customer-slot-1">11:30 AM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="customer-card waiting-customer">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div>
+                                                        <span class="status-badge badge-waiting">Waiting #2</span>
+                                                    </div>
+                                                    <div class="countdown">1 hr 15 min</div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Customer" class="customer-avatar me-3">
+                                                    <div>
+                                                        <h5 class="mb-1">Robert Wilson</h5>
+                                                        <p class="mb-1 small">Haircut</p>
+                                                        <div class="estimated-time">
+                                                            <i class="fas fa-user-clock me-1"></i> Estimated slot: <span>12:45 PM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Staff 2 -->
+                    <div class="staff-slide">
+                        <div class="staff-info-container">
+                            <div class="staff-avatar-container">
+                                <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="Staff" class="staff-avatar">
+                                <div class="text-center">
+                                    <h4 class="staff-name mb-1">John Smith</h4>
+                                    <p class="staff-specialty mb-0">Barber & Grooming</p>
+                                </div>
+                            </div>
+                            <div class="staff-details">
+                                <!-- Current and Next Service -->
+                                <div class="service-status">
+                                    <div class="service-column">
+                                        <h5 class="queue-title"><i class="fas fa-user-check me-2"></i>Currently Serving</h5>
+                                        <div class="customer-card current-customer">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="status-badge badge-serving">In Service</span>
+                                                </div>
+                                                <div class="countdown" id="current-countdown-2">8:30</div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Customer" class="customer-avatar me-3">
+                                                <div>
+                                                    <h5 class="mb-1">David Miller</h5>
+                                                    <p class="mb-1 small">Premium Shave</p>
+                                                    <div class="estimated-time">
+                                                        <i class="fas fa-user-clock me-1"></i> Estimated finish: <span id="current-finish-2">10:25 AM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="d-flex justify-content-between small mb-1">
+                                                    <span>Service Progress</span>
+                                                    <span>80%</span>
+                                                </div>
+                                                <div class="progress progress-thin">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 80%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-column">
+                                        <h5 class="queue-title"><i class="fas fa-user-clock me-2"></i>Next in Line</h5>
+                                        <div class="customer-card next-customer">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="status-badge badge-next">Next Up</span>
+                                                </div>
+                                                <div class="countdown" id="next-countdown-2">-</div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Customer" class="customer-avatar me-3">
+                                                <div>
+                                                    <h5 class="mb-1">Jessica Lee</h5>
+                                                    <p class="mb-1 small">Beard Trim</p>
+                                                    <div class="estimated-time">
+                                                        <i class="fas fa-clock me-1"></i> Estimated start: <span id="next-start-2">10:30 AM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="d-flex justify-content-between small mb-1">
+                                                    <span>Estimated Wait Time</span>
+                                                    <span>5 min</span>
+                                                </div>
+                                                <div class="progress progress-thin">
+                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 75%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Waiting Queue -->
+                                <div class="waiting-queue">
+                                    <h5 class="queue-title"><i class="fas fa-users me-2"></i>Waiting Queue</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="customer-card waiting-customer">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div>
+                                                        <span class="status-badge badge-waiting">Waiting #1</span>
+                                                    </div>
+                                                    <div class="countdown" id="wait-time-2">30 min</div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Customer" class="customer-avatar me-3">
+                                                    <div>
+                                                        <h5 class="mb-1">James Wilson</h5>
+                                                        <p class="mb-1 small">Haircut & Shave</p>
+                                                        <div class="estimated-time">
+                                                            <i class="fas fa-user-clock me-1"></i> Estimated slot: <span id="customer-slot-2">11:00 AM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Staff 3 -->
+                    <div class="staff-slide">
+                        <div class="staff-info-container">
+                            <div class="staff-avatar-container">
+                                <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Staff" class="staff-avatar">
+                                <div class="text-center">
+                                    <h4 class="staff-name mb-1">Lisa Chen</h4>
+                                    <p class="staff-specialty mb-0">Nail & Spa Specialist</p>
+                                </div>
+                            </div>
+                            <div class="staff-details">
+                                <!-- Current and Next Service -->
+                                <div class="service-status">
+                                    <div class="service-column">
+                                        <h5 class="queue-title"><i class="fas fa-user-check me-2"></i>Currently Serving</h5>
+                                        <div class="customer-card current-customer">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="status-badge badge-serving">In Service</span>
+                                                </div>
+                                                <div class="countdown" id="current-countdown-3">15:20</div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="Customer" class="customer-avatar me-3">
+                                                <div>
+                                                    <h5 class="mb-1">Amanda Taylor</h5>
+                                                    <p class="mb-1 small">Deluxe Manicure</p>
+                                                    <div class="estimated-time">
+                                                        <i class="fas fa-user-clock me-1"></i> Estimated finish: <span id="current-finish-3">10:50 AM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="d-flex justify-content-between small mb-1">
+                                                    <span>Service Progress</span>
+                                                    <span>40%</span>
+                                                </div>
+                                                <div class="progress progress-thin">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 40%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="service-column">
+                                        <h5 class="queue-title"><i class="fas fa-user-clock me-2"></i>Next in Line</h5>
+                                        <div class="customer-card next-customer">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <span class="status-badge badge-next">Next Up</span>
+                                                </div>
+                                                <div class="countdown" id="next-countdown-3">-</div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/62.jpg" alt="Customer" class="customer-avatar me-3">
+                                                <div>
+                                                    <h5 class="mb-1">Sophia Martinez</h5>
+                                                    <p class="mb-1 small">Gel Manicure</p>
+                                                    <div class="estimated-time">
+                                                        <i class="fas fa-clock me-1"></i> Estimated start: <span id="next-start-3">10:55 AM</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="d-flex justify-content-between small mb-1">
+                                                    <span>Estimated Wait Time</span>
+                                                    <span>35 min</span>
+                                                </div>
+                                                <div class="progress progress-thin">
+                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 15%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Waiting Queue -->
+                                <div class="waiting-queue">
+                                    <h5 class="queue-title"><i class="fas fa-users me-2"></i>Waiting Queue</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="customer-card waiting-customer">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div>
+                                                        <span class="status-badge badge-waiting">Waiting #1</span>
+                                                    </div>
+                                                    <div class="countdown" id="wait-time-3">1 hr 10 min</div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://randomuser.me/api/portraits/women/19.jpg" alt="Customer" class="customer-avatar me-3">
+                                                    <div>
+                                                        <h5 class="mb-1">Olivia Johnson</h5>
+                                                        <p class="mb-1 small">Spa Pedicure</p>
+                                                        <div class="estimated-time">
+                                                            <i class="fas fa-user-clock me-1"></i> Estimated slot: <span id="customer-slot-3">12:05 PM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="customer-card waiting-customer">
+                                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                                    <div>
+                                                        <span class="status-badge badge-waiting">Waiting #2</span>
+                                                    </div>
+                                                    <div class="countdown">1 hr 45 min</div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Customer" class="customer-avatar me-3">
+                                                    <div>
+                                                        <h5 class="mb-1">Daniel Kim</h5>
+                                                        <p class="mb-1 small">Manicure</p>
+                                                        <div class="estimated-time">
+                                                            <i class="fas fa-user-clock me-1"></i> Estimated slot: <span>12:40 PM</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Staff Indicators -->
+                <div class="staff-indicators" id="staff-indicators">
+                    <div class="staff-indicator active" data-index="0"></div>
+                    <div class="staff-indicator" data-index="1"></div>
+                    <div class="staff-indicator" data-index="2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="display-6 fw-bold text-success" id="serving-count">4</h2>
+                        <p class="mb-0">Currently Serving</p>
+                        <small class="text-muted">Across all staff</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="display-6 fw-bold text-warning" id="waiting-count">8</h2>
+                        <p class="mb-0">Waiting</p>
+                        <small class="text-muted">Average wait: 25 min</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="display-6 fw-bold text-primary" id="available-staff">5</h2>
+                        <p class="mb-0">Staff Available</p>
+                        <small class="text-muted">3 busy, 2 free</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <h2 class="display-6 fw-bold text-info" id="today-appointments">32</h2>
+                        <p class="mb-0">Today's Appointments</p>
+                        <small class="text-muted">15 completed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Auto Slide Toggle -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="auto-slide-toggle" checked>
+                    <label class="form-check-label" for="auto-slide-toggle">Auto Slide Between Staff (every 10 seconds)</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Current Queue -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-list-ol me-2"></i>All Appointments Today</h5>
+                            <div class="input-group input-group-sm" style="width: 200px;">
+                                <input type="text" class="form-control" placeholder="Search customer...">
+                                <button class="btn btn-outline-secondary" type="button"><i class="fas fa-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Customer</th>
+                                        <th>Service</th>
+                                        <th>Staff</th>
+                                        <th>Status</th>
+                                        <th>Estimated Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="table-success">
+                                        <td>10:00 AM</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+                                                <span>Sarah Johnson</span>
+                                            </div>
+                                        </td>
+                                        <td>Haircut & Color</td>
+                                        <td>Maria</td>
+                                        <td><span class="badge bg-success">In Service</span></td>
+                                        <td><span class="text-success">Finishing in <span>12:45</span></span></td>
+                                    </tr>
+                                    <tr class="table-success">
+                                        <td>10:15 AM</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+                                                <span>David Miller</span>
+                                            </div>
+                                        </td>
+                                        <td>Premium Shave</td>
+                                        <td>John</td>
+                                        <td><span class="badge bg-success">In Service</span></td>
+                                        <td><span class="text-success">Finishing in <span>8:30</span></span></td>
+                                    </tr>
+                                    <tr class="table-success">
+                                        <td>10:30 AM</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+                                                <span>Amanda Taylor</span>
+                                            </div>
+                                        </td>
+                                        <td>Deluxe Manicure</td>
+                                        <td>Lisa</td>
+                                        <td><span class="badge bg-success">In Service</span></td>
+                                        <td><span class="text-success">Finishing in <span>15:20</span></span></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td>10:30 AM</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+                                                <span>Michael Brown</span>
+                                            </div>
+                                        </td>
+                                        <td>Beard Trim</td>
+                                        <td>Maria</td>
+                                        <td><span class="badge bg-info">Next Up</span></td>
+                                        <td><span class="text-info">~20 min wait</span></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td>10:30 AM</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+                                                <span>Jessica Lee</span>
+                                            </div>
+                                        </td>
+                                        <td>Beard Trim</td>
+                                        <td>John</td>
+                                        <td><span class="badge bg-info">Next Up</span></td>
+                                        <td><span class="text-info">~5 min wait</span></td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td>10:55 AM</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://randomuser.me/api/portraits/women/62.jpg" alt="" width="32" height="32" class="rounded-circle me-2">
+                                                <span>Sophia Martinez</span>
+                                            </div>
+                                        </td>
+                                        <td>Gel Manicure</td>
+                                        <td>Lisa</td>
+                                        <td><span class="badge bg-info">Next Up</span></td>
+                                        <td><span class="text-info">~35 min wait</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Book Appointment -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Book Appointment</h5>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="service-type" class="form-label">Service</label>
+                                <select class="form-select" id="service-type">
+                                    <option selected>Select a service</option>
+                                    <option>Haircut</option>
+                                    <option>Hair Coloring</option>
+                                    <option>Beard Trim</option>
+                                    <option>Manicure</option>
+                                    <option>Pedicure</option>
+                                    <option>Hair Spa</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="appointment-date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="appointment-date">
+                            </div>
+                            <div class="mb-3">
+                                <label for="appointment-time" class="form-label">Preferred Time</label>
+                                <input type="time" class="form-control" id="appointment-time">
+                            </div>
+                            <div class="mb-3">
+                                <label for="staff-member" class="form-label">Preferred Staff</label>
+                                <select class="form-select" id="staff-member">
+                                    <option selected>Any available staff</option>
+                                    <option>Maria Rodriguez</option>
+                                    <option>John Smith</option>
+                                    <option>Lisa Chen</option>
+                                    <option>Sophia Williams</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Check Availability</button>
+                        </form>
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">You'll see estimated wait time before confirming</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Staff Availability -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0"><i class="fas fa-user-clock me-2"></i>Staff Availability</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Maria Rodriguez</span>
+                                <span class="text-success">Available at 11:30</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: 20%"></div>
+                                <div class="progress-bar bg-warning" style="width: 50%"></div>
+                                <div class="progress-bar bg-success" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>John Smith</span>
+                                <span class="text-warning">Available at 12:15</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-warning" style="width: 70%"></div>
+                                <div class="progress-bar bg-success" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Lisa Chen</span>
+                                <span class="text-success">Available now</span>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: 40%"></div>
+                                <div class="progress-bar bg-warning" style="width: 30%"></div>
+                                <div class="progress-bar bg-success" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-4 pb-2 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <h5><i class="fas fa-cut me-2"></i>SalonPro</h5>
+                    <p class="small text-white-50">Real-time salon management system to streamline your operations and enhance customer experience.</p>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50">Home</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Book Now</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Services</a></li>
+                        <li><a href="#" class="text-white-50">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled small text-white-50">
+                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> 123 Salon St, Beauty City</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2"></i> (123) 456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@salonpro.com</li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h5>Opening Hours</h5>
+                    <ul class="list-unstyled small text-white-50">
+                        <li class="mb-2">Mon-Fri: 9:00 AM - 7:00 PM</li>
+                        <li class="mb-2">Sat: 9:00 AM - 5:00 PM</li>
+                        <li>Sun: 10:00 AM - 4:00 PM</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-3 bg-secondary">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="small mb-0">© 2023 SalonPro. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="small mb-0">
+                        <a href="#" class="text-white-50 me-2">Privacy Policy</a>
+                        <a href="#" class="text-white-50">Terms of Service</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+   <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const staffQueue = document.getElementById('staff-queue');
+            const staffIndicators = document.querySelectorAll('.staff-indicator');
+            const prevBtn = document.getElementById('staff-prev');
+            const nextBtn = document.getElementById('staff-next');
+            const autoSlideToggle = document.getElementById('auto-slide-toggle');
+            
+            let currentStaffIndex = 0;
+            const staffCount = document.querySelectorAll('.staff-slide').length;
+            let autoSlideInterval;
+            
+            // Initialize slider
+            function initSlider() {
+                // Set initial position
+                staffQueue.style.transform = `translateX(-${currentStaffIndex * 100}%)`;
+                
+                // Update indicators
+                updateIndicators();
+                
+                // Update nav buttons
+                updateNavButtons();
+                
+                // Start auto slide if enabled
+                if(autoSlideToggle.checked) {
+                    startAutoSlide();
+                }
+            }
+            
+            // Update indicators
+            function updateIndicators() {
+                staffIndicators.forEach((indicator, i) => {
+                    indicator.classList.toggle('active', i === currentStaffIndex);
+                });
+            }
+            
+            // Update navigation buttons
+            function updateNavButtons() {
+                prevBtn.classList.toggle('staff-nav-disabled', currentStaffIndex === 0);
+                nextBtn.classList.toggle('staff-nav-disabled', currentStaffIndex === staffCount - 1);
+            }
+            
+            // Go to specific staff slide
+            function goToStaff(index) {
+                currentStaffIndex = index;
+                staffQueue.style.transform = `translateX(-${currentStaffIndex * 100}%)`;
+                updateIndicators();
+                updateNavButtons();
+            }
+            
+            // Next staff
+            function nextStaff() {
+                if (currentStaffIndex < staffCount - 1) {
+                    currentStaffIndex++;
+                    goToStaff(currentStaffIndex);
+                }
+            }
+            
+            // Previous staff
+            function prevStaff() {
+                if (currentStaffIndex > 0) {
+                    currentStaffIndex--;
+                    goToStaff(currentStaffIndex);
+                }
+            }
+            
+            // Start auto slide
+            function startAutoSlide() {
+                stopAutoSlide(); // Clear any existing interval
+                autoSlideInterval = setInterval(() => {
+                    if (currentStaffIndex < staffCount - 1) {
+                        nextStaff();
+                    } else {
+                        goToStaff(0);
+                    }
+                }, 10000); // 10 seconds
+            }
+            
+            // Stop auto slide
+            function stopAutoSlide() {
+                if(autoSlideInterval) {
+                    clearInterval(autoSlideInterval);
+                }
+            }
+            
+            // Event listeners
+            nextBtn.addEventListener('click', nextStaff);
+            prevBtn.addEventListener('click', prevStaff);
+            
+            staffIndicators.forEach(indicator => {
+                indicator.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    goToStaff(index);
+                });
+            });
+            
+            autoSlideToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    startAutoSlide();
+                } else {
+                    stopAutoSlide();
+                }
+            });
+            
+            // Initialize the slider
+            initSlider();
+            
+            // Other functions (time updates, countdowns etc.)
+            function updateCurrentTime() {
+                // আপনার টাইম আপডেট লজিক
+            }
+            
+            function updateCountdowns() {
+                // আপনার কাউন্টডাউন আপডেট লজিক
+            }
+            
+            function updateStats() {
+                // আপনার স্ট্যাটস আপডেট লজিক
+            }
+            
+            // Initial calls
+            updateCurrentTime();
+            updateCountdowns();
+            updateStats();
+            
+            // Set intervals
+            setInterval(updateCurrentTime, 60000);
+            setInterval(updateCountdowns, 60000);
+            setInterval(updateStats, 30000);
+        });
+    </script>
+</body>
+</html>
